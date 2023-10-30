@@ -5,7 +5,7 @@
 Use git to clone the repository:
 
 ```bash
-git clone https://github.com/unica-isde/isde-projects-2023-B
+git clone https://github.com/unica-isde/isde-projects-2023-C
 ```
 
 Optional but recommended - create conda environment: https://docs.conda.io/projects/miniconda/en/latest/
