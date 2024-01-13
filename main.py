@@ -17,6 +17,12 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+from app.forms.transformation_form import TransformationForm
+from app.ml.transformation_utils import transform_image
+import io
+import base64
+
+
 app = FastAPI()
 config = Configuration()
 
@@ -64,7 +70,6 @@ async def request_classification(request: Request):
         },
     )
 
-
 @app.get("/histogram")
 def create_histogram(request: Request):
     return templates.TemplateResponse(
@@ -84,6 +89,26 @@ async def request_histogram(request: Request):
         {
             "request": request,
             "image_id": image_id
+        }
 
+@app.post("/transformations")
+async def request_transformation(request: Request):
+    form = TransformationForm(request)
+    await form.load_data()
+    image_id = form.image_id
+    img_color = float(form.img_color)
+    img_brightness = float(form.img_brightness)
+    img_contrast = float(form.img_contrast)
+    img_sharpness = float(form.img_sharpness)
+    img_str = transform_image(img_id=image_id, img_color=img_color, img_brightness=img_brightness, img_contrast=img_contrast, img_sharpness=img_sharpness)
+    return templates.TemplateResponse(
+        "transformation_output.html",
+        {
+            "request": request,
+            "img_str": img_str,
+            "img_color": img_color,
+            "img_brightness": img_brightness,
+            "img_contrast": img_contrast,
+            "img_sharpness": img_sharpness,
         },
     )
