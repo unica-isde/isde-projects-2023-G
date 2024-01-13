@@ -1,4 +1,5 @@
 import json
+import cv2 as cv
 from typing import Dict, List
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -12,6 +13,9 @@ from app.forms.classification_form import ClassificationForm
 from app.ml.classification_utils import classify_image
 from app.utils import list_images
 
+from fastapi import FastAPI
+
+app = FastAPI()
 
 from app.forms.transformation_form import TransformationForm
 from app.ml.transformation_utils import transform_image
@@ -65,6 +69,27 @@ async def request_classification(request: Request):
             "classification_scores": json.dumps(classification_scores),
         },
     )
+
+@app.get("/histogram")
+def create_histogram(request: Request):
+    return templates.TemplateResponse(
+        "histogram_select.html",
+        {"request": request, "images": list_images()},
+    )
+
+
+@app.post("/histogram")
+async def request_histogram(request: Request):
+    form = ClassificationForm(request)
+    await form.load_data()
+    image_id = form.image_id
+
+    return templates.TemplateResponse(
+        "histogram_output.html",
+        {
+            "request": request,
+            "image_id": image_id
+        }
 
 @app.post("/transformations")
 async def request_transformation(request: Request):
