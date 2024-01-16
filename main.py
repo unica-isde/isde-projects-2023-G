@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
 import redis
 from rq import Connection, Queue
 from rq.job import Job
@@ -14,6 +15,8 @@ from starlette.responses import FileResponse
 import redis
 from rq import Connection, Queue
 from rq.job import Job
+
+
 from app.config import Configuration
 from app.forms.classification_form import ClassificationForm
 from app.ml.classification_utils import classify_image
@@ -21,8 +24,7 @@ from app.utils import list_images
 
 from app.forms.transformation_form import TransformationForm
 from app.ml.transformation_utils import transform_image
-import io
-import base64
+
 
 
 app = FastAPI()
@@ -72,11 +74,13 @@ async def request_classification(request: Request):
         },
     )
 
+
 @app.get("/download_result")
 async def download_result():
     file_name = "json_results.json"
     file_path = "app/static/json_results.json"
     return FileResponse(path=file_path, filename=file_name, media_type="text/json")
+
 
 
 @app.get("/histogram")
