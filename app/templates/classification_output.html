@@ -31,6 +31,11 @@
                 </div>
                 <a class="btn btn-primary" href="/classifications" role="button">Back</a>
 
+                <a class="btn btn-primary" href="/download_result" download role="button">Download results</a>
+                <a id="downloadButton" class="btn btn-primary"  download role="button">Download plot</a>
+
+
+
 
 
         </div>
@@ -38,6 +43,32 @@
 
 
     <script src="{{ "static/graph.js" }}" id="makeGraph" classification_scores="{{classification_scores}}"></script>
+
+
+    <script>
+    // Funzione per convertire il canvas in un'immagine dati URL
+    function convertCanvasToImage(canvas) {
+        var img = new Image();
+        img.src = canvas.toDataURL("image/png");
+        return img;
+    }
+
+    // Funzione per avviare il download dell'immagine
+    function downloadImage() {
+        var canvas = document.getElementById("classificationOutput");
+        var img = convertCanvasToImage(canvas);
+
+        var link = document.createElement('a');
+        link.href = img.src;
+        link.download = 'plot.png';
+        link.click();
+    }
+
+    // Aggiungi un ascoltatore di eventi al pulsante di download
+    document.getElementById("downloadButton").addEventListener("click", downloadImage);
+</script>
+
+
 
 {% endblock %}
 
