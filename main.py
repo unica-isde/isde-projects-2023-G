@@ -7,11 +7,17 @@ from fastapi.templating import Jinja2Templates
 import redis
 from rq import Connection, Queue
 from rq.job import Job
+from starlette.responses import FileResponse
+
+
+
+import redis
+from rq import Connection, Queue
+from rq.job import Job
 from app.config import Configuration
 from app.forms.classification_form import ClassificationForm
 from app.ml.classification_utils import classify_image
 from app.utils import list_images
-
 
 from app.forms.transformation_form import TransformationForm
 from app.ml.transformation_utils import transform_image
@@ -63,6 +69,35 @@ async def request_classification(request: Request):
             "request": request,
             "image_id": image_id,
             "classification_scores": json.dumps(classification_scores),
+        },
+    )
+
+@app.get("/download_result")
+async def download_result():
+    file_name = "json_results.json"
+    file_path = "app/static/json_results.json"
+    return FileResponse(path=file_path, filename=file_name, media_type="text/json")
+
+
+@app.get("/histogram")
+def create_histogram(request: Request):
+    return templates.TemplateResponse(
+        "histogram_select.html",
+        {"request": request, "images": list_images()},
+    )
+
+
+@app.post("/histogram")
+async def request_histogram(request: Request):
+    form = ClassificationForm(request)
+    await form.load_data()
+    image_id = form.image_id
+
+    return templates.TemplateResponse(
+        "histogram_output.html",
+        {
+            "request": request,
+            "image_id": image_id
         },
     )
 
