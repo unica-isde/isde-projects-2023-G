@@ -1,17 +1,21 @@
+import base64
 import json
+from io import BytesIO
 from typing import Dict, List
-from fastapi import FastAPI, Request
+
+import PIL
+from PIL import Image
+from fastapi import FastAPI, Request, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import redis
-from rq import Connection, Queue
-from rq.job import Job
+# from rq import Connection, Queue
+# from rq.job import Job
 from app.config import Configuration
 from app.forms.classification_form import ClassificationForm
-from app.ml.classification_utils import classify_image
+from app.ml.classification_utils import *
 from app.utils import list_images
-
 
 app = FastAPI()
 config = Configuration()
@@ -56,6 +60,46 @@ async def request_classification(request: Request):
         {
             "request": request,
             "image_id": image_id,
+            "classification_scores": json.dumps(classification_scores),
+        },
+    )
+
+
+@app.get("/classify_my_upload")
+def create_classify(request: Request):
+    return templates.TemplateResponse(
+        "upload.html",
+        {"request": request, "images": list_images(), "models": Configuration.models},
+    )
+
+
+@app.post("/classify_my_upload")
+async def upload_and_classify(file: UploadFile, request: Request):
+    form = ClassificationForm(request)
+    await form.load_data()
+    file_content = await file.read()
+
+    # Create PIL object for classification
+    try:
+        img = Image.open(BytesIO(file_content))
+        check_format(img)
+    except PIL.UnidentifiedImageError:
+        raise HTTPException(status_code=404, detail="Unable to find the image")
+
+    # Convert the image in base 64 for visualization
+    try:
+        if check_format(img):
+            img_data_base64 = base64.b64encode(file_content).decode('utf-8')
+    except TypeError:
+        raise HTTPException(status_code=404, detail="Unable to convert image on base 64")
+
+    model_id = form.model_id
+    classification_scores = classify_image(model_id=model_id, img_id=img)
+    return templates.TemplateResponse(
+        "classification_output_uploaded.html",
+        {
+            "request": request,
+            "image":  f"data:image/png;base64,{img_data_base64}",
             "classification_scores": json.dumps(classification_scores),
         },
     )
