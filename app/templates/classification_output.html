@@ -10,7 +10,6 @@
             display: block;
             margin: 0 auto;
         }
-
     </style>
     <div class="row">
         <div class="col">
@@ -33,17 +32,10 @@
 
                 <a class="btn btn-primary" href="/download_result" download role="button">Download results</a>
                 <a id="downloadButton" class="btn btn-primary"  download role="button">Download plot</a>
-
-
-
-
-
         </div>
     </div>
-
-
+    <script src= "{{ "static/graph.js" }}" id="makeGraph" classification_scores="{{classification_scores}}"></script>
     <script src="{{ "static/graph.js" }}" id="makeGraph" classification_scores="{{classification_scores}}"></script>
-
 
     <script>
     // Funzione per convertire il canvas in un'immagine dati URL
@@ -67,8 +59,6 @@
     // Aggiungi un ascoltatore di eventi al pulsante di download
     document.getElementById("downloadButton").addEventListener("click", downloadImage);
 </script>
-
-
 
 {% endblock %}
 
