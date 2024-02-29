@@ -58,6 +58,11 @@ async def request_classification(request: Request):
     image_id = form.image_id
     model_id = form.model_id
     classification_scores = classify_image(model_id=model_id, img_id=image_id)
+
+    file_path = "app/static/json_results.json"
+    with open(file_path, "w") as file:
+        json.dump(classification_scores, file)
+
     return templates.TemplateResponse(
         "classification_output.html",
         {
@@ -96,6 +101,7 @@ async def upload_and_classify(file: UploadFile, request: Request):
 
     model_id = form.model_id
     classification_scores = classify_image(model_id=model_id, img_id=img)
+
     return templates.TemplateResponse(
         "classification_output_uploaded.html",
         {
