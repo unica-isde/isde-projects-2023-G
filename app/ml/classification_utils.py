@@ -18,6 +18,7 @@ from app.config import Configuration
 from fastapi import UploadFile, File, HTTPException
 import re
 
+
 conf = Configuration()
 
 

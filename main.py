@@ -1,31 +1,27 @@
 import base64
-import json
-from io import BytesIO
 from typing import Dict, List
 import PIL
-from PIL import Image
-from fastapi import FastAPI, Request, UploadFile, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import redis
-from rq import Connection, Queue
-from rq.job import Job
 from starlette.responses import FileResponse
-from app.config import Configuration
 from app.forms.classification_form import ClassificationForm
 from app.ml.classification_utils import *
 from app.utils import list_images
 from app.forms.transformation_form import TransformationForm
 from app.ml.transformation_utils import transform_image
-
+import json
+from fastapi.responses import FileResponse
+from contextlib import contextmanager
+import os
+from fastapi import HTTPException
 
 app = FastAPI()
 config = Configuration()
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
-
 
 @app.get("/info")
 def info() -> Dict[str, List[str]]:
@@ -58,10 +54,6 @@ async def request_classification(request: Request):
     image_id = form.image_id
     model_id = form.model_id
     classification_scores = classify_image(model_id=model_id, img_id=image_id)
-
-    file_path = "app/static/json_results.json"
-    with open(file_path, "w") as file:
-        json.dump(classification_scores, file)
 
     return templates.TemplateResponse(
         "classification_output.html",
@@ -111,11 +103,15 @@ async def upload_and_classify(file: UploadFile, request: Request):
         },
     )
 
+
 @app.get("/download_result")
 async def download_result():
     file_name = "json_results.json"
     file_path = "app/static/json_results.json"
-    return FileResponse(path=file_path, filename=file_name, media_type="text/json")
+
+    response = FileResponse(path=file_path, filename=file_name, media_type="text/json")
+    return response
+
 
 @app.get("/histogram")
 def create_histogram(request: Request):
@@ -136,6 +132,13 @@ async def request_histogram(request: Request):
             "request": request,
             "image_id": image_id
         },
+    )
+
+@app.get("/transformations")
+def create_transformation(request: Request):
+    return templates.TemplateResponse(
+        "transformation_select.html",
+        {"request": request, "images": list_images() },
     )
 
 @app.post("/transformations")

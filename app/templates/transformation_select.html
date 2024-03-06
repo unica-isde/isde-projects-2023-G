@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <form action="transformations" method="post" novalidate>
+        <h1>
+            Modify the image's parameters:
+        </h1>
+        <h4>
+            Image:
+        </h4>
+        <p>
+            <select name="image_id">
+                {% for image in images %}
+                  <option value="{{ image }}" SELECTED>{{ image }}</option>
+                {% endfor %}
+              </select>
+        </p>
+        <p><b>Color: </b>(Select a value between 0.0 --> black and white image and 1.0 --> original image)</p>
+        <label for="img_color">Color: </label>
+        <input type="number" name="img_color" id="img_color" value="1.0">
+        <br>
+        <p><b>Brightness: </b>(Select a value considering that 0.0 --> black image and 1.0 --> original image, higher values will raise the brightness)</p>
+        <label for="img_brightness">Brightness: </label>
+        <input type="number" name="img_brightness" id="img_brightness" value="1.0">
+        <br>
+        <p><b>Contrast: </b>(Select a value considering that 0.0 --> solid grey image and 1.0 --> original image, higher values will raise the contrast)</p>
+        <label for="img_contrast">Contrast: </label>
+        <input type="number" name="img_contrast" id="img_contrast" value="1.0">
+        <br>
+        <p><b>Sharpness: </b>(Select a value considering that 0.0 --> blurred image, 1.0 --> original image and 2.0 --> sharpneded image)</p>
+        <label for="img_sharpness">Sharpness: </label>
+        <input type="number" name="img_sharpness" id="img_sharpness" value="1.0">
+        <br>
+        <br>
+        <button type="submit" class="btn btn-dark mb-2">Modify the image!</button>
+    </form>
+{% endblock %}
