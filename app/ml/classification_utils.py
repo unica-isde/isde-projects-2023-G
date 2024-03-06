@@ -2,6 +2,7 @@
 This is a simple classification service. It accepts an url of an
 image and returns the top-5 classification labels and scores.
 """
+
 import importlib
 import json
 import logging
@@ -104,3 +105,7 @@ def check_format(img):
         return True
     else:
         raise HTTPException(status_code=404, detail="Format not accepted: must be JPEG or PNG")
+
+
+
+
