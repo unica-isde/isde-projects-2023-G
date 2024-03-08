@@ -7,18 +7,12 @@ import importlib
 import json
 import logging
 import os
-from io import BytesIO
-
 import magic
-import starlette
 import torch
 from PIL import Image
 from torchvision import transforms
-
 from app.config import Configuration
-
-from fastapi import UploadFile, File, HTTPException
-import re
+from fastapi import HTTPException
 
 
 conf = Configuration()
@@ -101,6 +95,8 @@ def process_input_image(input):
         raise TypeError("FILE TYPE UNKNOWN")
 
 def check_format(img):
+    """Checks if the format of the image is either JPEG or PNG. If not,
+    it raises an HTTPException. The check is done using the magic library."""
     format = magic.from_buffer(img)
     if 'PNG image data' in format or 'JPEG image data' in format:
         return True

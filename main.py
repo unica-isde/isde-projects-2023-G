@@ -1,19 +1,11 @@
 import base64
-import json
 from io import BytesIO
 from typing import Dict, List
 import PIL
-import magic
-from PIL import Image
-from fastapi import FastAPI, Request, UploadFile, HTTPException
+from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import redis
-from rq import Connection, Queue
-from rq.job import Job
-from starlette.responses import FileResponse
-from app.config import Configuration
 from app.forms.classification_form import ClassificationForm
 from app.ml.classification_utils import *
 from app.utils import list_images
@@ -71,6 +63,7 @@ async def request_classification(request: Request):
 
 @app.get("/classify_my_upload")
 def create_classify(request: Request):
+    """Create the form to upload an image and classify it."""
     return templates.TemplateResponse(
         "upload.html",
         {"request": request, "images": list_images(), "models": Configuration.models},
@@ -78,6 +71,7 @@ def create_classify(request: Request):
 
 @app.post("/classify_my_upload")
 async def upload_and_classify(file: UploadFile, request: Request):
+    """Upload an image and classify it."""
     form = ClassificationForm(request)
     await form.load_data()
 
@@ -118,6 +112,7 @@ async def upload_and_classify(file: UploadFile, request: Request):
 
 @app.get("/histogram")
 def create_histogram(request: Request):
+    """Create the form to select an image for histogram visualization."""
     return templates.TemplateResponse(
         "histogram_select.html",
         {"request": request, "images": list_images()},
@@ -125,6 +120,7 @@ def create_histogram(request: Request):
 
 @app.post("/histogram")
 async def request_histogram(request: Request):
+    """Create the histogram visualization for the selected image."""
     form = ClassificationForm(request)
     await form.load_data()
     image_id = form.image_id
@@ -138,6 +134,7 @@ async def request_histogram(request: Request):
     )
 @app.get("/transformations")
 def create_transformation(request: Request):
+    """Create the form to select an image for transformation and the transformation parameters."""
     return templates.TemplateResponse(
         "transformation_select.html",
         {"request": request, "images": list_images() },
@@ -145,6 +142,7 @@ def create_transformation(request: Request):
 
 @app.post("/transformations")
 async def request_transformation(request: Request):
+    """Create the transformation visualization for the selected image."""
     form = TransformationForm(request)
     await form.load_data()
     image_id = form.image_id

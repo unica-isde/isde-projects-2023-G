@@ -1,10 +1,7 @@
-import importlib
-import json
-import logging
-import os
-import torch
-from PIL import Image
-from torchvision import transforms
+"""
+This module contains the functions that are used to transform
+color, sharpness, contrast or brightness of a selected  image
+"""
 
 from app.config import Configuration
 from PIL import ImageEnhance
@@ -16,9 +13,9 @@ conf = Configuration()
 
 
 def transform_image(img_id, img_color, img_brightness, img_contrast, img_sharpness):
-    """Returns the top-5 classification score output from the
-    model specified in model_id when it is fed with the
-    image corresponding to img_id."""
+    """Transforms the image with the specified ID using the
+    specified color, brightness, contrast and sharpness values. It
+    returns the transformed image as a base64 string."""
     img = fetch_image(img_id)
 
     color_enhancer = ImageEnhance.Color(img)
