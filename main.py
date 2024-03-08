@@ -3,6 +3,7 @@ import json
 from io import BytesIO
 from typing import Dict, List
 import PIL
+import magic
 from PIL import Image
 from fastapi import FastAPI, Request, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse
@@ -19,6 +20,7 @@ from app.utils import list_images
 from app.forms.transformation_form import TransformationForm
 from app.ml.transformation_utils import transform_image
 
+MAX_DIM = 5242880 # 5MB
 
 app = FastAPI()
 config = Configuration()
@@ -78,18 +80,24 @@ def create_classify(request: Request):
 async def upload_and_classify(file: UploadFile, request: Request):
     form = ClassificationForm(request)
     await form.load_data()
-    file_content = await file.read()
+
+    file_content = await file.read(MAX_DIM)
+
+    if len(file_content) >= MAX_DIM:
+        raise HTTPException(status_code=400, detail="File exceed the max dimension of 5MB")
+
+    check_format(file_content)
 
     # Create PIL object for classification
     try:
-        img = Image.open(BytesIO(file_content))
-        check_format(img)
+        if check_format(file_content):
+            img = Image.open(BytesIO(file_content))
     except PIL.UnidentifiedImageError:
         raise HTTPException(status_code=404, detail="Unable to find the image")
 
     # Convert the image in base 64 for visualization
     try:
-        if check_format(img):
+        if check_format(file_content):
             img_data_base64 = base64.b64encode(file_content).decode('utf-8')
     except TypeError:
         raise HTTPException(status_code=404, detail="Unable to convert image on base 64")

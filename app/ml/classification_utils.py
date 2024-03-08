@@ -9,6 +9,7 @@ import logging
 import os
 from io import BytesIO
 
+import magic
 import starlette
 import torch
 from PIL import Image
@@ -92,16 +93,16 @@ def classify_image(model_id, img_id):
     return output
 
 def process_input_image(input):
-    if isinstance(input,Image.Image):  #pass directly the image
+    if isinstance(input, Image.Image):  #pass directly the image
         return input
-    elif isinstance(input,str):  #pass image id
+    elif isinstance(input, str):  #pass image id
         return fetch_image(input)
     else:
         raise TypeError("FILE TYPE UNKNOWN")
 
 def check_format(img):
-    format = img.format.lower()
-    if format == 'jpeg' or format == 'png':
+    format = magic.from_buffer(img)
+    if 'PNG image data' in format or 'JPEG image data' in format:
         return True
     else:
         raise HTTPException(status_code=404, detail="Format not accepted: must be JPEG or PNG")
