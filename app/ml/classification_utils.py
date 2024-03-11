@@ -2,15 +2,17 @@
 This is a simple classification service. It accepts an url of an
 image and returns the top-5 classification labels and scores.
 """
+
 import importlib
 import json
 import logging
 import os
+import magic
 import torch
 from PIL import Image
 from torchvision import transforms
-
 from app.config import Configuration
+from fastapi import HTTPException
 
 
 conf = Configuration()
@@ -51,7 +53,7 @@ def classify_image(model_id, img_id):
     """Returns the top-5 classification score output from the
     model specified in model_id when it is fed with the
     image corresponding to img_id."""
-    img = fetch_image(img_id)
+    img = process_input_image(img_id)
     model = get_model(model_id)
     model.eval()
     transform = transforms.Compose(
@@ -83,3 +85,24 @@ def classify_image(model_id, img_id):
 
     img.close()
     return output
+
+def process_input_image(input):
+    if isinstance(input, Image.Image):  #pass directly the image
+        return input
+    elif isinstance(input, str):  #pass image id
+        return fetch_image(input)
+    else:
+        raise TypeError("FILE TYPE UNKNOWN")
+
+def check_format(img):
+    """Checks if the format of the image is either JPEG or PNG. If not,
+    it raises an HTTPException. The check is done using the magic library."""
+    format = magic.from_buffer(img)
+    if 'PNG image data' in format or 'JPEG image data' in format:
+        return True
+    else:
+        raise HTTPException(status_code=404, detail="Format not accepted: must be JPEG or PNG")
+
+
+
+

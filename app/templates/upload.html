@@ -3,7 +3,7 @@
 {% block content %}
 
     <h1>Select Model and Image</h1>
-    <form action="classifications" method="post" novalidate>
+    <form action="/classify_my_upload" method="post" enctype="multipart/form-data">
         <h4>
             Model:
         </h4>
@@ -18,14 +18,10 @@
             Image:
         </h4>
         <p>
-            <select name="image_id">
-                {% for image in images %}
-                  <option value="{{ image }}" SELECTED>{{ image }}</option>
-                {% endfor %}     
-              </select>
+
+                <input type="file" id="myFile" name="file">
+
         </p>
         <button type="submit" class="btn btn-dark mb-2">Submit</button>
     </form>
-    <br>
-
 {% endblock %}
